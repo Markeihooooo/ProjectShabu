@@ -2,9 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg'); // ใช้ PostgreSQL client
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken');
 require('dotenv').config(); // โหลดตัวแปรสิ่งแวดล้อมจาก .env
 
 const app = express();
+
+const secret = "Test@4%#$6*"
 
 // ตั้งค่า CORS
 app.use(cors());
@@ -58,17 +61,29 @@ app.post('/register', async (req, res) => {
   }
 });
 
-
-
-
-
-
-
-
-
-
-
-
+app.post('/login', async (req, res) => {
+  const { user_name, user_pass } = req.body;
+  if (!user_name || !user_pass) {
+    return res.status(400).json({ error: 'Please provide both username and password.' });
+  }
+  try {
+    const result = await pool.query('SELECT * FROM public."user" WHERE user_name = $1', [user_name]);
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Invalid username or password.' });
+    }
+    const user = result.rows[0];
+    const passwordMatch = await bcrypt.compare(user_pass, user.user_pass);
+    if (!passwordMatch) {
+      return res.status(401).json({ error: 'Invalid username or password.' });
+    }
+    const token = jwt.sign({ user_id: user.user_id }, secret, { expiresIn: '1d' });
+    console.log(token)
+    res.status(200).json({ message: 'Login successful!', token });
+  } catch (error) {
+    console.error('Error logging in:', error);
+    res.status(500).json({ error: 'Database error' });
+  }
+})
 
 // เริ่มต้นเซิร์ฟเวอร์ที่พอร์ต 3001
 app.listen(3001, () => {
