@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg'); // ใช้ PostgreSQL client
+const bcrypt = require('bcrypt')
 require('dotenv').config(); // โหลดตัวแปรสิ่งแวดล้อมจาก .env
 
 const app = express();
@@ -30,33 +31,42 @@ app.get('/', (req, res) => {
 
 app.get('/users', async (req, res) => {
   try {
-    // คำสั่ง SQL ที่ใช้ดึงข้อมูลจากตาราง 'user'
+    
     const result = await pool.query('SELECT * FROM public."user"');
-    res.json(result.rows); // ส่งข้อมูลกลับเป็น JSON
+    res.json(result.rows); 
   } catch (error) {
     console.error('Error fetching users:', error);
     res.status(500).json({ error: 'Database error' });
   }
 });
 
-// Endpoint สำหรับการสมัครสมาชิก
+
 app.post('/register', async (req, res) => {
   const { user_name, user_pass } = req.body;
-
-  // ตรวจสอบข้อมูลที่รับมาจาก request body
+  
   if (!user_name || !user_pass) {
     return res.status(400).json({ error: 'Please provide both username and password.' });
   }
 
   try {
-    // คำสั่ง SQL สำหรับการเพิ่มข้อมูลผู้ใช้
-    await pool.query('INSERT INTO public."user" (user_name, user_pass) VALUES ($1, $2)', [user_name, user_pass]);
+    const passwordHash = await bcrypt.hash(user_pass, 12);
+    await pool.query('INSERT INTO public."user" (user_name, user_pass) VALUES ($1, $2)', [user_name, passwordHash]);
     res.status(201).json({ message: 'User registered successfully!' });
   } catch (error) {
     console.error('Error registering user:', error);
     res.status(500).json({ error: 'Database error' });
   }
 });
+
+
+
+
+
+
+
+
+
+
 
 
 

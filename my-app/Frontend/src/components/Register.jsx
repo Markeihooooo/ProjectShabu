@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { handleRegister } from './registerFunction';
+
+
 import Swal from 'sweetalert2';
 
 const Register = () => {
@@ -40,15 +42,17 @@ const Register = () => {
   return (
     <div className="container">
       <div>
-        <input onClick={goToLogin} className='back' type="button" value={"<"} />
+        <input onClick={goToLogin}   className='back' type="submit" value={"<"} />
       </div>
       <div>
         <img 
-          src="https://scontent.fbkk13-2.fna.fbcdn.net/v/t39.30808-6/296123974_1096341914627508_5219895537905772823_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=2cAgqwCgKVMQ7kNvgHE4_ym&_nc_ht=scontent.fbkk13-2.fna&_nc_gid=ARkghowasc0mlVxJyfUa40O&oh=00_AYCQJWTvwcrpxTKdnU0MgruqBmptfOGpvUBKqnRf-v9THg&oe=66E78BC6" 
+          src="
+          https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTWHkZ0S0Zu28gnwMbYWIhksr55-N8IgMyYiQ&s
+          " 
           alt="Logo" 
         />
       </div>
-      <div><h1>หน้าลงทะเบียน</h1></div>
+      <div><h1>Register for oder <br/>Menu</h1></div>
       <form onSubmit={onRegister}>
         <div>
           <input
