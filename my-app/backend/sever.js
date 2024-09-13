@@ -89,3 +89,22 @@ app.post('/login', async (req, res) => {
 app.listen(3001, () => {
   console.log('Server is running on port 3001');
 });
+
+app.get('/food', async (req, res) => {
+  try {
+    // ดึงข้อมูลทั้งหมดจากตาราง catagory
+    const result = await pool.query('SELECT * FROM public."catagory"');
+
+    // ดึงเฉพาะค่าของ column "name" จากข้อมูลที่ได้
+    const catagoryName = result.rows.map(catagory => catagory.name);
+
+    // ส่งผลลัพธ์ออกไปใน response
+    res.json({ catagoryName }); // ส่งชื่อ category ในรูปแบบของ JSON
+
+    // พิมพ์ข้อมูล category name ลงใน console
+    //console.log(catagoryName);
+  } catch (error) {
+    console.error('Error fetching categories:', error);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
