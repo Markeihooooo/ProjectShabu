@@ -1,34 +1,35 @@
 import React, { useState } from 'react';
 
-function MyComponent() {
-  // สร้าง state เพื่อจัดการกับการซ่อน/แสดง
-  const [isHidden, setIsHidden] = useState(false);
+const categories = ['เนื้อสัตว์', 'อาหารทะเล', 'ผักสด', 'ของทานเล่น', 'เครื่องดื่ม'];
 
-  // ฟังก์ชันที่จะถูกเรียกเมื่อกดปุ่ม
-  const toggleVisibility = () => {
-    setIsHidden(!isHidden); // เปลี่ยนค่า state เพื่อซ่อน/แสดง
+const Menu = () => {
+  const [selectedCategory, setSelectedCategory] = useState(null);
+
+  const handleCategoryClick = (category) => {
+    setSelectedCategory(category);
   };
 
   return (
     <div>
-      {/* ปุ่มที่ใช้ในการกดเพื่อซ่อนหรือแสดง */}
-      <button onClick={toggleVisibility}>
-        {isHidden ? 'Show' : 'Hide'}
-      </button>
-
-      {/* องค์ประกอบที่จะซ่อนหรือแสดง */}
-      <div className={isHidden ? 'hidden' : ''}>
-        This content will be hidden or shown.
+      <div className="category-menu">
+        {categories.map((category, index) => (
+          <button key={index} onClick={() => handleCategoryClick(category)}>
+            {category}
+          </button>
+        ))}
       </div>
 
-      {/* สไตล์สำหรับการซ่อน */}
-      <style jsx>{`
-        .hidden {
-          display: none;
-        }
-      `}</style>
+      <div className="bodymenu">
+        {categories.map((category, index) => (
+          category === selectedCategory && (
+            <div key={index}>
+              <h1>{category}</h1>
+            </div>
+          )
+        ))}
+      </div>
     </div>
   );
-}
+};
 
-export default MyComponent;
+export default Menu;

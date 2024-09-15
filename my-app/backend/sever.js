@@ -90,10 +90,21 @@ app.listen(3001, () => {
   console.log('Server is running on port 3001');
 });
 
+app.get('/meat', async (req, res) => {  // ลบเครื่องหมายจุลภาคออกจากเส้นทาง
+  try {
+    const result = await pool.query((sqlmeat));
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching menus:', error);
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+
 app.get('/food', async (req, res) => {
   try {
     // ดึงข้อมูลทั้งหมดจากตาราง catagory
-    const result = await pool.query('SELECT * FROM public."catagory"');
+    const result = await pool.query('SELECT * FROM public."CategoryTable"');
 
     // ดึงเฉพาะค่าของ column "name" จากข้อมูลที่ได้
     const catagoryName = result.rows.map(catagory => catagory.name);
@@ -108,3 +119,18 @@ app.get('/food', async (req, res) => {
     res.status(500).json({ error: 'Database error' });
   }
 });
+
+
+
+const sqlmeat  = `
+SELECT 
+    m.menu_id, 
+    m.menu_name, 
+    c.name,
+    m.availability
+FROM 
+    public."Menu_table" m
+JOIN 
+    public."CategoryTable" c
+ON 
+    m.category_id = c.id;` ;
