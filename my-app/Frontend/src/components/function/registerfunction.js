@@ -1,12 +1,14 @@
 import axios from 'axios';
 
-// ฟังก์ชันสำหรับการสมัครสมาชิก
-export const handleRegister = async (userName, userPass) => {
+// Function for user registration
+export const handleRegister = async (userName, userPass, telNo) => {
   try {
-    console.log('Registering with:', { userName, userPass }); // ตรวจสอบค่าที่ส่งไปยัง API
+    console.log('Registering with:', { userName, userPass, telNo }); // Check values sent to API
     const response = await axios.post('http://localhost:3001/register', {
-      user_name: userName,
-      user_pass: userPass,
+      username: userName,
+      password: userPass,
+      tel_no: telNo, // Include phone number in request
+      role: 'user', // Default role set to 'admin'
     });
     return response.data;
   } catch (error) {

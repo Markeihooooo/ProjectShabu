@@ -1,13 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const { Pool } = require('pg'); // ใช้ PostgreSQL client
-const bcrypt = require('bcrypt')
+const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 require('dotenv').config(); // โหลดตัวแปรสิ่งแวดล้อมจาก .env
 
 const app = express();
 
-const secret = "Test@4%#$6*"
+const secret = "Test@4%#$6*"; // Secret key สำหรับการสร้าง JWT
 
 // ตั้งค่า CORS
 app.use(cors());
@@ -32,10 +32,10 @@ app.get('/', (req, res) => {
   res.send('Hello World');
 });
 
+// ดึงข้อมูล users ทั้งหมดจากตาราง employee
 app.get('/users', async (req, res) => {
   try {
-    
-    const result = await pool.query('SELECT * FROM public."user"');
+    const result = await pool.query('SELECT * FROM public."employee"');
     res.json(result.rows); 
   } catch (error) {
     console.error('Error fetching users:', error);
@@ -43,94 +43,63 @@ app.get('/users', async (req, res) => {
   }
 });
 
-
+// Endpoint สำหรับการลงทะเบียน
 app.post('/register', async (req, res) => {
-  const { user_name, user_pass } = req.body;
+  const { username, password, tel_no, role } = req.body;
   
-  if (!user_name || !user_pass) {
-    return res.status(400).json({ error: 'Please provide both username and password.' });
+  if (!username || !password || !tel_no) {
+    return res.status(400).json({ error: 'Please provide all required fields: username, password, and tel_no.' });
   }
 
   try {
-    const passwordHash = await bcrypt.hash(user_pass, 12);
-    await pool.query('INSERT INTO public."user" (user_name, user_pass) VALUES ($1, $2)', [user_name, passwordHash]);
-    res.status(201).json({ message: 'User registered successfully!' });
+    // Ensure the password is a string
+    if (typeof password !== 'string') {
+      return res.status(400).json({ error: 'Password must be a valid string.' });
+    }
+
+    const passwordHash = await bcrypt.hash(password, 12); // hash the password with 12 salt rounds
+    await pool.query(
+      'INSERT INTO public."employee" (username, password, tel_no, role) VALUES ($1, $2, $3, $4)', 
+      [username, passwordHash, tel_no, role || 'admin']
+    );
+    res.status(201).json({ message: 'Employee registered successfully!' });
   } catch (error) {
-    console.error('Error registering user:', error);
+    console.error('Error registering employee:', error);
     res.status(500).json({ error: 'Database error' });
   }
 });
 
+// Endpoint สำหรับการเข้าสู่ระบบ
 app.post('/login', async (req, res) => {
   const { user_name, user_pass } = req.body;
+
   if (!user_name || !user_pass) {
-    return res.status(400).json({ error: 'Please provide both username and password.' });
+    return res.status(400).json({ error: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน' });
   }
+
   try {
-    const result = await pool.query('SELECT * FROM public."user" WHERE user_name = $1', [user_name]);
+    const result = await pool.query('SELECT * FROM public."employee" WHERE username = $1', [user_name]);
+
     if (result.rows.length === 0) {
-      return res.status(401).json({ error: 'Invalid username or password.' });
+      return res.status(401).json({ error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
     }
+
     const user = result.rows[0];
-    const passwordMatch = await bcrypt.compare(user_pass, user.user_pass);
+    const passwordMatch = await bcrypt.compare(user_pass, user.password); // ตรวจสอบรหัสผ่านที่ถูกต้อง
+
     if (!passwordMatch) {
-      return res.status(401).json({ error: 'Invalid username or password.' });
+      return res.status(401).json({ error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
     }
-    const token = jwt.sign({ user_id: user.user_id }, secret, { expiresIn: '1d' });
-    console.log(token)
-    res.status(200).json({ message: 'Login successful!', token });
+
+    const token = jwt.sign({ user_id: user.id, role: user.role }, secret, { expiresIn: '1d' });
+    res.status(200).json({ message: 'Login successful!', token, role: user.role }); // ส่ง role กลับไปด้วย
   } catch (error) {
     console.error('Error logging in:', error);
-    res.status(500).json({ error: 'Database error' });
+    res.status(500).json({ error: 'เกิดข้อผิดพลาดในการเชื่อมต่อฐานข้อมูล' });
   }
-})
+});
 
 // เริ่มต้นเซิร์ฟเวอร์ที่พอร์ต 3001
 app.listen(3001, () => {
   console.log('Server is running on port 3001');
 });
-
-app.get('/meat', async (req, res) => {  // ลบเครื่องหมายจุลภาคออกจากเส้นทาง
-  try {
-    const result = await pool.query((sqlmeat));
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Error fetching menus:', error);
-    res.status(500).json({ error: 'Database error' });
-  }
-});
-
-
-app.get('/food', async (req, res) => {
-  try {
-    // ดึงข้อมูลทั้งหมดจากตาราง catagory
-    const result = await pool.query('SELECT * FROM public."CategoryTable"');
-
-    // ดึงเฉพาะค่าของ column "name" จากข้อมูลที่ได้
-    const catagoryName = result.rows.map(catagory => catagory.name);
-
-    // ส่งผลลัพธ์ออกไปใน response
-    res.json({ catagoryName }); // ส่งชื่อ category ในรูปแบบของ JSON
-
-    // พิมพ์ข้อมูล category name ลงใน console
-    //console.log(catagoryName);
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-    res.status(500).json({ error: 'Database error' });
-  }
-});
-
-
-
-const sqlmeat  = `
-SELECT 
-    m.menu_id, 
-    m.menu_name, 
-    c.name,
-    m.availability
-FROM 
-    public."Menu_table" m
-JOIN 
-    public."CategoryTable" c
-ON 
-    m.category_id = c.id;` ;

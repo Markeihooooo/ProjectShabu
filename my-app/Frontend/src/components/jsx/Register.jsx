@@ -1,31 +1,29 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { handleRegister } from '../function/registerfunction';
-
-
 import Swal from 'sweetalert2';
 
 const Register = () => {
   const [userName, setUserName] = useState('');
   const [userPass, setUserPass] = useState('');
+  const [telNo, setTelNo] = useState('');
   const navigate = useNavigate();
 
   const onRegister = async (event) => {
-    event.preventDefault(); // ป้องกันการรีเฟรชหน้า
+    event.preventDefault(); // Prevent page refresh
 
     try {
-      await handleRegister(userName, userPass);
-      // แสดงการแจ้งเตือนสำเร็จ
+      // Call the handleRegister function to send user data
+      await handleRegister(userName, userPass, telNo);
       Swal.fire({
         title: 'สำเร็จ!',
         text: 'คุณได้สมัครสมาชิกเรียบร้อยแล้ว',
         icon: 'success',
         confirmButtonText: 'ตกลง'
       }).then(() => {
-        navigate('/'); // เปลี่ยนเส้นทางไปหน้า Login
+        navigate('/'); // Navigate to login page
       });
     } catch (error) {
-      // แสดงการแจ้งเตือนข้อผิดพลาด
       Swal.fire({
         title: 'เกิดข้อผิดพลาด!',
         text: 'มีปัญหาในการสมัครสมาชิก',
@@ -36,23 +34,21 @@ const Register = () => {
   };
 
   const goToLogin = () => {
-    navigate('/'); // เปลี่ยนเส้นทางไปหน้า Login
+    navigate('/'); // Navigate to login page
   };
 
   return (
     <div className="container">
       <div>
-        <input onClick={goToLogin}   className='back' type="submit" value={"<"} />
+        <input onClick={goToLogin} className='back' type="submit" value={"<"} />
       </div>
       <div>
-        <img 
-          src="
-          https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTWHkZ0S0Zu28gnwMbYWIhksr55-N8IgMyYiQ&s
-          " 
-          alt="Logo" 
+        <img
+          src="https://img5.pic.in.th/file/secure-sv1/Screenshot-2567-09-22-at-11.06.22-2.png"
+          alt="Logo"
         />
       </div>
-      <div><h1>Register for oder <br/>Menu</h1></div>
+      <div><h1>Register for Order <br />Menu</h1></div>
       <form onSubmit={onRegister}>
         <div>
           <input
@@ -69,6 +65,15 @@ const Register = () => {
             placeholder="Password"
             value={userPass}
             onChange={(e) => setUserPass(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <input
+            type="text"
+            placeholder="Phone Number"
+            value={telNo}
+            onChange={(e) => setTelNo(e.target.value)}
             required
           />
         </div>

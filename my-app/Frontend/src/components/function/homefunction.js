@@ -8,11 +8,8 @@ export const useGoToRegister = () => {
 };
 
 // ฟังก์ชันสำหรับการ login
-export const submit = async () => {
-  const user_name = document.querySelector('input[type="text"]').value;
-  const user_pass = document.querySelector('input[type="password"]').value;
-
-  if (!user_name || !user_pass) {
+export const submitLogin = async (userName, userPass) => {
+  if (!userName || !userPass) {
     Swal.fire({
       title: 'Error!',
       text: 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน',
@@ -28,10 +25,10 @@ export const submit = async () => {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ user_name, user_pass }),
-    })
+      body: JSON.stringify({ user_name: userName, user_pass: userPass }),
+    });
 
-    const data = response.json();
+    const data = await response.json();
 
     if (response.ok) {
       Swal.fire({
@@ -41,7 +38,13 @@ export const submit = async () => {
         confirmButtonText: 'ตกลง'
       }).then(() => {
         localStorage.setItem('token', data.token);
-        window.location.href = '/home'; // เปลี่ยนเส้นทางไปหน้า Home
+
+        // เปลี่ยนเส้นทางตาม role
+        if (data.role === 'admin') {
+          window.location.href = '/admin'; // เปลี่ยนไปยังหน้า admin
+        } else {
+          window.location.href = '/home'; // เปลี่ยนไปยังหน้า user
+        }
       });
     } else {
       Swal.fire({

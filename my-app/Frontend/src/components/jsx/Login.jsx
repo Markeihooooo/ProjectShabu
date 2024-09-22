@@ -1,21 +1,49 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './style.css';
-import { useGoToRegister,submit } from '../function/homefunction'; 
+import { useGoToRegister, submitLogin } from '../function/homefunction'; 
+import Swal from 'sweetalert2';
 
 const Login = () => {
-    const goToRegister = useGoToRegister();
+  const [userName, setUserName] = useState('');
+  const [userPass, setUserPass] = useState('');
+  const goToRegister = useGoToRegister();
+
+  const handleLogin = async (event) => {
+    event.preventDefault(); // ป้องกันการรีเฟรชหน้า
+
+    await submitLogin(userName, userPass); // เรียกใช้งานฟังก์ชันล็อกอิน
+  };
 
   return (
     <div className="container">
       <div>
-        <img src="https://scontent.fbkk13-2.fna.fbcdn.net/v/t39.30808-6/296123974_1096341914627508_5219895537905772823_n.jpg?_nc_cat=107&ccb=1-7&_nc_sid=6ee11a&_nc_ohc=2cAgqwCgKVMQ7kNvgHE4_ym&_nc_ht=scontent.fbkk13-2.fna&_nc_gid=ARkghowasc0mlVxJyfUa40O&oh=00_AYCQJWTvwcrpxTKdnU0MgruqBmptfOGpvUBKqnRf-v9THg&oe=66E78BC6" alt="" />
+        <img src="https://img5.pic.in.th/file/secure-sv1/Screenshot-2567-09-22-at-11.06.22-2.png" alt="Logo" />
       </div>
       <h1 className="welcome">ยินดีต้อนรับสู่ร้านชาบู</h1>
-      <div><input type="text" placeholder="ID" /></div>
-      <div><input type="password" placeholder="Password" /></div>
-      
-      <div><input onClick={submit} type="submit" value="Login" /></div>
-      <div><input onClick={goToRegister} type="submit" value="Register" /></div>
+      <form onSubmit={handleLogin}>
+        <div>
+          <input 
+            type="text" 
+            placeholder="ID" 
+            value={userName} 
+            onChange={(e) => setUserName(e.target.value)} 
+          />
+        </div>
+        <div>
+          <input 
+            type="password" 
+            placeholder="Password" 
+            value={userPass} 
+            onChange={(e) => setUserPass(e.target.value)} 
+          />
+        </div>
+        <div>
+          <input type="submit" value="Login" />
+        </div>
+      </form>
+      <div>
+        <input onClick={goToRegister} type="submit" value="Register" />
+      </div>
     </div>
   );
 };
